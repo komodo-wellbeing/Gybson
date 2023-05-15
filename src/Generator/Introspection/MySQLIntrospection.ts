@@ -110,7 +110,7 @@ export class MySQLIntrospection implements Introspection {
         let enums: { [enumName: string]: EnumDefinition } = {};
 
         const rawEnumRecords = await this.knex('information_schema.columns')
-            .select('table_name', 'column_name', 'column_type')
+            .select({ table_name: 'table_name', column_name: 'column_name', column_type: 'column_type' })
             .whereIn('data_type', ['enum', 'set'])
             .where({ table_schema: this.schemaName, table_name: tableName });
 
@@ -134,7 +134,13 @@ export class MySQLIntrospection implements Introspection {
         let tableDefinition: TableDefinition = {};
 
         const tableColumns = await this.knex('information_schema.columns')
-            .select('column_name', 'data_type', 'is_nullable', 'column_default', 'extra')
+            .select({
+                column_name: 'column_name',
+                data_type: 'data_type',
+                is_nullable: 'is_nullable',
+                column_default: 'column_default',
+                extra: 'extra',
+            })
             .where({ table_name: tableName, table_schema: this.schemaName });
 
         tableColumns.map(
@@ -162,12 +168,12 @@ export class MySQLIntrospection implements Introspection {
 
     public async getTableConstraints(tableName: string): Promise<ConstraintDefinition[]> {
         const rows = await this.knex('information_schema.key_column_usage as key_usage')
-            .select(
-                'key_usage.table_name',
-                'key_usage.column_name',
-                'key_usage.constraint_name',
-                'constraints.constraint_type',
-            )
+            .select({
+                table_name: 'key_usage.table_name',
+                column_name: 'key_usage.column_name',
+                constraint_name: 'key_usage.constraint_name',
+                constraint_type: 'constraints.constraint_type',
+            })
             .distinct()
             .leftJoin('information_schema.table_constraints as constraints', function () {
                 this.on('key_usage.constraint_name', '=', 'constraints.constraint_name');
@@ -202,7 +208,13 @@ export class MySQLIntrospection implements Introspection {
      */
     public async getForwardRelations(tableName: string): Promise<RelationDefinition[]> {
         const rows = await this.knex('information_schema.key_column_usage')
-            .select('table_name', 'column_name', 'constraint_name', 'referenced_table_name', 'referenced_column_name')
+            .select({
+                table_name: 'table_name',
+                column_name: 'column_name',
+                constraint_name: 'constraint_name',
+                referenced_table_name: 'referenced_table_name',
+                referenced_column_name: 'referenced_column_name',
+            })
             .where({ table_name: tableName, table_schema: this.schemaName });
 
         // group by constraint name to capture multiple relations to same table
@@ -231,7 +243,13 @@ export class MySQLIntrospection implements Introspection {
      */
     public async getBackwardRelations(tableName: string): Promise<RelationDefinition[]> {
         const rows = await this.knex('information_schema.key_column_usage')
-            .select('table_name', 'column_name', 'constraint_name', 'referenced_table_name', 'referenced_column_name')
+            .select({
+                table_name: 'table_name',
+                column_name: 'column_name',
+                constraint_name: 'constraint_name',
+                referenced_table_name: 'referenced_table_name',
+                referenced_column_name: 'referenced_column_name',
+            })
             .where({ referenced_table_name: tableName, table_schema: this.schemaName });
 
         // group by constraint name to capture multiple relations to same table
@@ -259,7 +277,7 @@ export class MySQLIntrospection implements Introspection {
      */
     public async getSchemaTables(): Promise<string[]> {
         const schemaTables = await this.knex('information_schema.columns')
-            .select('table_name')
+            .select({ table_name: 'table_name' })
             .where({ table_schema: this.schemaName })
             .groupBy('table_name');
 

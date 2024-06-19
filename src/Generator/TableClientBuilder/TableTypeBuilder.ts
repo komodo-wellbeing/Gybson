@@ -1,6 +1,6 @@
-import { EnumDefinitions, TableDefinition } from '../Introspection/IntrospectionTypes';
-import { ColumnDefinition, Comparable, RelationDefinition } from '../../TypeTruth/TypeTruth';
 import _ from 'lodash';
+import { ColumnDefinition, Comparable, RelationDefinition } from '../../TypeTruth/TypeTruth';
+import { EnumDefinitions, TableDefinition } from '../Introspection/IntrospectionTypes';
 import { PascalCase } from '../lib';
 
 export type TableTypeNames = {
@@ -95,6 +95,7 @@ export class TableTypeBuilder {
                         let nullable = columnDefinition.nullable ? '| null' : '';
                         return `${columnName}: ${type}${nullable};`;
                     })
+                    .sort()
                     .join(' ')}
             }
         `;
@@ -117,6 +118,7 @@ export class TableTypeBuilder {
                         }
                         return `${columnName}: ${type};`;
                     })
+                    .sort()
                     .join(' ')}
             }
         `;
@@ -132,6 +134,7 @@ export class TableTypeBuilder {
             export interface ${columnMapTypeName} {
              ${Object.values(columns)
                  .map((col) => `${col.columnName}: boolean;`)
+                 .sort()
                  .join(' ')}
             }
         `;
@@ -215,6 +218,7 @@ export class TableTypeBuilder {
             export interface ${whereTypeName} {
                 ${Object.values(columns)
                     .map((col) => TableTypeBuilder.whereFilterForColumn({ column: col }))
+                    .sort()
                     .join('; ')}
                 ${TableTypeBuilder.buildWhereCombinersForTable({ whereTypeName })}
                 ${relations.map((relation) => {
@@ -234,6 +238,7 @@ export class TableTypeBuilder {
             export type ${orderByTypeName} = {
                 ${Object.values(columns)
                     .map((col) => `${col.columnName}?: Order;`)
+                    .sort()
                     .join(' ')}
             };
         `;

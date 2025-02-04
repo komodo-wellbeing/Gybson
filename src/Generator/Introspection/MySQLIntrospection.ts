@@ -141,7 +141,8 @@ export class MySQLIntrospection implements Introspection {
                 column_default: 'column_default',
                 extra: 'extra',
             })
-            .where({ table_name: tableName, table_schema: this.schemaName });
+            .where({ table_name: tableName, table_schema: this.schemaName })
+            .orderBy('column_name');
 
         tableColumns.map(
             (schemaItem: {
